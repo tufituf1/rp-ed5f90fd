@@ -1,21 +1,42 @@
 # ROK Dijital otomatik paylaşım
 
-`posts/` klasörüne yüklenen her gönderi otomatik olarak **Instagram (@rokdijital)** ve **ROK Dijital Facebook sayfasında** paylaşılır.
+`takvim/` klasöründeki her gönderi, zamanı gelince **Instagram** ve **ROK Dijital Facebook sayfasında** paylaşılır. GitHub her 15 dakikada bir takvimi kontrol eder (birkaç dakika gecikebilir).
 
-## Gönderi nasıl eklenir
+## Takvim
 
-1. Görseli `posts/` klasörüne koyun (jpg, png veya webp; Instagram için kare 1:1 veya dikey 4:5 önerilir).
-2. Açıklamayı aynı adla `.txt` dosyasına yazın (isteğe bağlı).
+Her gönderi bir klasördür. Klasör adı paylaşım zamanını taşır (Türkiye saati):
 
 ```
-posts/2026-11-05-kampanya.jpg
-posts/2026-11-05-kampanya.txt
+takvim/2026-11-05_1215_whatsapp-onizleme/
+    01.jpg 02.jpg ...   carousel kareleri (tek kare varsa tek görsel)
+    01.mp4              isteğe bağlı: 1. karenin hareketli hali (Facebook'ta 01.jpg kullanılır)
+    aciklama.txt        gönderi metni
+
+takvim/2026-11-07_1800_yegenim-hallediyor/
+    video.mp4           Reels
+    kapak.jpg           Reels kapağı
+    aciklama.txt
 ```
 
-3. Gönderin (commit + push). Paylaşım birkaç dakika içinde yapılır, dosyalar `paylasildi/` klasörüne taşınır.
+- Görseller 12:15'te, Reels 18:00'de paylaşılır.
+- Paylaşılan gönderi `paylasildi/` klasörüne taşınır, içine `sonuc.txt` yazılır.
+- Zamanı 6 saatten fazla geçmiş gönderi otomatik paylaşılmaz (yanlışlıkla toplu paylaşımı önler).
+- Bir gönderiyi iptal etmek için klasörünü silin; saatini değiştirmek için klasör adını değiştirin.
+
+## Açma / kapatma
+
+Takvimli paylaşım yalnızca depoda `AKTIF` adlı dosya varsa çalışır. Durdurmak için `AKTIF` dosyasını silin.
+
+## Elle çalıştırma
+
+Actions › "Instagram ve Facebook paylasimi" › Run workflow:
+
+- `kontrol`: bağlantıyı, izinleri ve takvimi kontrol eder, paylaşım yapmaz.
+- `simdi`: `klasor` alanına yazılan gönderiyi hemen paylaşır.
+- `takvim`: zamanı gelenleri paylaşır.
 
 ## Notlar
 
-- Depo herkese açıktır: `posts/` içine konan görsel ve metinler paylaşımdan önce de görülebilir.
+- Depo herkese açıktır: takvimdeki görseller ve metinler paylaşımdan önce de görülebilir.
 - Erişim anahtarı yalnızca `IG_ACCESS_TOKEN` gizli değişkeninde durur, koda yazılmaz.
-- Bağlantı testi: Actions › "Instagram ve Facebook paylasimi" › Run workflow (varsayılan olarak sadece kontrol eder, paylaşım yapmaz).
+- Bir paylaşım hata verirse GitHub size e-posta gönderir; gönderi takvimde kalır.

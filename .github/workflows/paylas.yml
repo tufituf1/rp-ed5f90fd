@@ -1,15 +1,20 @@
 name: Instagram ve Facebook paylasimi
 
 on:
-  push:
-    branches: [main]
-    paths: ["posts/**"]
+  schedule:
+    # Her 15 dakikada bir takvimi kontrol eder (GitHub birkac dakika gecikebilir).
+    - cron: "*/15 * * * *"
   workflow_dispatch:
     inputs:
-      sadece_kontrol:
-        description: "Sadece baglantiyi kontrol et (paylasim yapma)"
-        type: boolean
-        default: true
+      mod:
+        description: "kontrol = sadece baglanti ve takvimi kontrol et; simdi = asagidaki klasoru hemen paylas; takvim = zamani geleni paylas"
+        type: choice
+        options: [kontrol, simdi, takvim]
+        default: kontrol
+      klasor:
+        description: "mod=simdi icin takvim/ altindaki klasor adi (orn. 2026-11-05_1000_whatsapp-onizleme)"
+        type: string
+        default: ""
 
 permissions:
   contents: write
@@ -21,17 +26,19 @@ concurrency:
 jobs:
   paylas:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install requests pillow
+      - run: pip install requests
       - name: Paylas
         env:
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
           IG_USER_ID: "17841402476178102"
-          SADECE_KONTROL: ${{ github.event_name == 'workflow_dispatch' && inputs.sadece_kontrol || 'false' }}
+          MOD: ${{ github.event_name == 'workflow_dispatch' && inputs.mod || 'takvim' }}
+          KLASOR: ${{ inputs.klasor }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
