@@ -1,0 +1,38 @@
+name: Instagram ve Facebook paylasimi
+
+on:
+  push:
+    branches: [main]
+    paths: ["posts/**"]
+  workflow_dispatch:
+    inputs:
+      sadece_kontrol:
+        description: "Sadece baglantiyi kontrol et (paylasim yapma)"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: paylasim
+  cancel-in-progress: false
+
+jobs:
+  paylas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests pillow
+      - name: Paylas
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          IG_USER_ID: "17841402476178102"
+          SADECE_KONTROL: ${{ github.event_name == 'workflow_dispatch' && inputs.sadece_kontrol || 'false' }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          python paylas.py
