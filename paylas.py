@@ -141,31 +141,39 @@ def wait_ready(container, what):
 
 def upload_video(container_info, path):
     """Videoyu Instagram'a dogrudan yukler (herkese acik adrese gerek yok)."""
-    size = path.stat().st_size
-    with path.open("rb") as fh:
-        r = requests.post(container_info["uri"], data=fh, timeout=600, headers={
-            "Authorization": f"OAuth {TOKEN}", "offset": "0", "file_size": str(size)})
+    data = path.read_bytes()
+    r = requests.post(container_info["uri"], data=data, timeout=600, headers={
+        "Authorization": f"OAuth {TOKEN}", "offset": "0", "file_size": str(len(data)),
+        "Content-Type": "application/octet-stream"})
     if r.status_code != 200:
         raise RuntimeError(f"Instagram video yuklemesi basarisiz: {r.text[:300]}")
 
 
-def ig_video_container(path, **params):
-    info = api("POST", f"{IG_ID}/media", upload_type="resumable", access_token=TOKEN, **params)
-    upload_video(info, path)
-    return info["id"]
+def ig_video_container(path, sha=None, **params):
+    """Once dogrudan yuklemeyi dener; olmazsa videoyu GitHub adresinden cektirir."""
+    try:
+        info = api("POST", f"{IG_ID}/media", upload_type="resumable", access_token=TOKEN, **params)
+        upload_video(info, path)
+        return info["id"]
+    except Exception as e:  # noqa: BLE001
+        if not sha:
+            raise
+        print(f"Dogrudan yukleme olmadi ({e}); adresten cekme deneniyor.")
+        return api("POST", f"{IG_ID}/media", video_url=raw_url(path, sha), access_token=TOKEN,
+                   **params)["id"]
 
 
 def publish_instagram(post, sha):
     caption = post["caption"]
     if post["kind"] == "reels":
         extra = {"cover_url": raw_url(post["cover"], sha)} if post["cover"] else {}
-        cid = ig_video_container(post["video"], media_type="REELS", caption=caption,
+        cid = ig_video_container(post["video"], sha, media_type="REELS", caption=caption,
                                  share_to_feed="true", **extra)
         wait_ready(cid, "Reels videosunu")
     elif post["kind"] == "single":
         item = post["items"][0]
         if item["mp4"]:
-            cid = ig_video_container(item["mp4"], media_type="REELS", caption=caption,
+            cid = ig_video_container(item["mp4"], sha, media_type="REELS", caption=caption,
                                      share_to_feed="true", cover_url=raw_url(item["jpg"], sha))
         else:
             cid = api("POST", f"{IG_ID}/media", image_url=raw_url(item["jpg"], sha),
@@ -175,7 +183,7 @@ def publish_instagram(post, sha):
         children = []
         for item in post["items"]:
             if item["mp4"]:
-                child = ig_video_container(item["mp4"], media_type="VIDEO",
+                child = ig_video_container(item["mp4"], sha, media_type="VIDEO",
                                            is_carousel_item="true")
             else:
                 child = api("POST", f"{IG_ID}/media", image_url=raw_url(item["jpg"], sha),
