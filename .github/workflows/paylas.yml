@@ -15,6 +15,10 @@ on:
         description: "mod=simdi icin takvim/ altindaki klasor adi (orn. 2026-11-05_1000_whatsapp-onizleme)"
         type: string
         default: ""
+      sadece_instagram:
+        description: "Facebook'a paylasma (test icin)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -39,6 +43,7 @@ jobs:
           IG_USER_ID: "17841402476178102"
           MOD: ${{ github.event_name == 'workflow_dispatch' && inputs.mod || 'takvim' }}
           KLASOR: ${{ inputs.klasor }}
+          SADECE_INSTAGRAM: ${{ inputs.sadece_instagram || false }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

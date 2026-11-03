@@ -37,6 +37,7 @@ REPO = os.environ.get("GITHUB_REPOSITORY", "")
 MODE = os.environ.get("MOD", "takvim")  # takvim | kontrol | simdi
 TARGET = os.environ.get("KLASOR", "").strip()
 DRY = os.environ.get("DENEME", "false") == "true"
+ONLY_IG = os.environ.get("SADECE_INSTAGRAM", "false") == "true"
 
 TZ = ZoneInfo("Europe/Istanbul")
 QUEUE = Path("takvim")
@@ -214,9 +215,9 @@ def publish_facebook(page, post, sha):
 
 def due_posts(now):
     if MODE == "simdi":
-        folder = QUEUE / TARGET
+        folder = Path(TARGET) if "/" in TARGET else QUEUE / TARGET
         if not TARGET or not folder.is_dir():
-            raise RuntimeError(f"Klasor bulunamadi: takvim/{TARGET}")
+            raise RuntimeError(f"Klasor bulunamadi: {folder}")
         return [folder]
     due = []
     for folder in sorted(p for p in QUEUE.glob("*") if p.is_dir()):
@@ -277,13 +278,15 @@ def main():
             failed += 1
             continue  # Instagram olmadan Facebook'a da gecme; klasor takvimde kalir
         try:
+            if ONLY_IG:
+                raise RuntimeError("atlandi (sadece Instagram istendi)")
             fb = publish_facebook(page, post, sha)
             log.append(f"facebook {fb}")
             print(f"Facebook'ta paylasildi (gonderi id {fb})")
         except Exception as e:  # noqa: BLE001
-            log.append(f"facebook HATA {e}")
-            print(f"HATA Facebook: {e}")
-            failed += 1
+            log.append(f"facebook {e}" if ONLY_IG else f"facebook HATA {e}")
+            print(f"Facebook: {e}" if ONLY_IG else f"HATA Facebook: {e}")
+            failed += 0 if ONLY_IG else 1
         (folder / "sonuc.txt").write_text("\n".join(log) + f"\n{now.isoformat()}\n", encoding="utf-8")
         git("add", "-A", str(folder))
         git("mv", str(folder), str(DONE / folder.name))
