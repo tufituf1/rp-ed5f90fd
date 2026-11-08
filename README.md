@@ -20,7 +20,8 @@ takvim/2026-11-07_1800_yegenim-hallediyor/
 
 - Görseller 12:15'te, Reels 18:00'de paylaşılır.
 - Paylaşılan gönderi `paylasildi/` klasörüne taşınır, içine `sonuc.txt` yazılır.
-- Zamanı 6 saatten fazla geçmiş gönderi otomatik paylaşılmaz (yanlışlıkla toplu paylaşımı önler).
+- Zamanı 20 saatten fazla geçmiş gönderi otomatik paylaşılmaz (yanlışlıkla toplu paylaşımı önler).
+- GitHub'ın kendi zamanlayıcısı saatlerce gecikebildiği için paylaşım ayrıca her gün 12:16 ve 18:16'da elle tetiklenir.
 - Bir gönderiyi iptal etmek için klasörünü silin; saatini değiştirmek için klasör adını değiştirin.
 
 ## Açma / kapatma

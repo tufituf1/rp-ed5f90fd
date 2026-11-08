@@ -43,7 +43,7 @@ TZ = ZoneInfo("Europe/Istanbul")
 QUEUE = Path("takvim")
 DONE = Path("paylasildi")
 SWITCH = Path("AKTIF")
-LATE_LIMIT = timedelta(hours=6)  # bundan daha gec kalan gonderi otomatik paylasilmaz
+LATE_LIMIT = timedelta(hours=20)  # GitHub zamanlayicisi saatlerce gecikebiliyor; bundan gec kalan paylasilmaz
 
 
 def mask(value):
