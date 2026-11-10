@@ -43,6 +43,7 @@ TZ = ZoneInfo("Europe/Istanbul")
 QUEUE = Path("takvim")
 DONE = Path("paylasildi")
 SWITCH = Path("AKTIF")
+COVER_MS = "6500"  # hareketli karelerde kapak: animasyonun bittigi an (ilk kare bos)
 LATE_LIMIT = timedelta(hours=20)  # GitHub zamanlayicisi saatlerce gecikebiliyor; bundan gec kalan paylasilmaz
 
 
@@ -184,7 +185,7 @@ def publish_instagram(post, sha):
         for item in post["items"]:
             if item["mp4"]:
                 child = ig_video_container(item["mp4"], sha, media_type="VIDEO",
-                                           is_carousel_item="true")
+                                           is_carousel_item="true", thumb_offset=COVER_MS)
             else:
                 child = api("POST", f"{IG_ID}/media", image_url=raw_url(item["jpg"], sha),
                             is_carousel_item="true", access_token=TOKEN)["id"]
