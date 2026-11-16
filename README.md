@@ -1,6 +1,6 @@
 # ROK Dijital otomatik paylaşım
 
-`takvim/` klasöründeki her gönderi, zamanı gelince **Instagram** ve **ROK Dijital Facebook sayfasında** paylaşılır. GitHub her 15 dakikada bir takvimi kontrol eder (birkaç dakika gecikebilir).
+`takvim/` klasöründeki her gönderi, zamanı gelince **Instagram** ve **ROK Dijital Facebook sayfasında** paylaşılır. Arka planda sürekli açık duran bir "bekçi" iş, gönderinin saatini bekleyip tam zamanında paylaşır.
 
 ## Takvim
 
@@ -21,12 +21,12 @@ takvim/2026-11-07_1800_yegenim-hallediyor/
 - Görseller 12:15'te, Reels 18:00'de paylaşılır.
 - Paylaşılan gönderi `paylasildi/` klasörüne taşınır, içine `sonuc.txt` yazılır.
 - Zamanı 20 saatten fazla geçmiş gönderi otomatik paylaşılmaz (yanlışlıkla toplu paylaşımı önler).
-- GitHub'ın kendi zamanlayıcısı saatlerce gecikebildiği için paylaşım ayrıca her gün 12:16 ve 18:16'da elle tetiklenir.
+- Bekçi iş yaklaşık 5,5 saatte bir kendini yeniden başlatır; zincir koparsa saatlik zamanlayıcı onu tekrar ayağa kaldırır.
 - Bir gönderiyi iptal etmek için klasörünü silin; saatini değiştirmek için klasör adını değiştirin.
 
 ## Açma / kapatma
 
-Takvimli paylaşım yalnızca depoda `AKTIF` adlı dosya varsa çalışır. Durdurmak için `AKTIF` dosyasını silin.
+Takvimli paylaşım yalnızca depoda `AKTIF` adlı dosya varsa çalışır. Durdurmak için `AKTIF` dosyasını silin; bekçi de kendini kapatır.
 
 ## Elle çalıştırma
 
@@ -34,7 +34,8 @@ Actions › "Instagram ve Facebook paylasimi" › Run workflow:
 
 - `kontrol`: bağlantıyı, izinleri ve takvimi kontrol eder, paylaşım yapmaz.
 - `simdi`: `klasor` alanına yazılan gönderiyi hemen paylaşır.
-- `takvim`: zamanı gelenleri paylaşır.
+- `takvim`: zamanı gelenleri bir kere paylaşır.
+- `bekci`: bekçiyi elle başlatır (normalde kendiliğinden çalışır).
 
 ## Notlar
 

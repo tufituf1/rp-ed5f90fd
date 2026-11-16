@@ -2,14 +2,14 @@ name: Instagram ve Facebook paylasimi
 
 on:
   schedule:
-    # Her 15 dakikada bir takvimi kontrol eder (GitHub birkac dakika gecikebilir).
-    - cron: "*/15 * * * *"
+    # Bekci zinciri koparsa yeniden baslatmak icin (GitHub bu zamanlayiciyi saatlerce geciktirebilir).
+    - cron: "7 * * * *"
   workflow_dispatch:
     inputs:
       mod:
-        description: "kontrol = sadece baglanti ve takvimi kontrol et; simdi = asagidaki klasoru hemen paylas; takvim = zamani geleni paylas"
+        description: "bekci = takvimi bekle ve saatinde paylas (otomatik); kontrol = sadece baglanti ve takvimi kontrol et; simdi = asagidaki klasoru hemen paylas; takvim = zamani geleni bir kere paylas"
         type: choice
-        options: [kontrol, simdi, takvim]
+        options: [kontrol, simdi, takvim, bekci]
         default: kontrol
       klasor:
         description: "mod=simdi icin takvim/ altindaki klasor adi (orn. 2026-11-05_1000_whatsapp-onizleme)"
@@ -22,15 +22,17 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
-  group: paylasim
+  # Ayni anda tek bekci calisir; kontrol/simdi/takvim beklemeden kendi basina calisir.
+  group: ${{ (github.event_name == 'schedule' || inputs.mod == 'bekci') && 'bekci' || format('tek-{0}', github.run_id) }}
   cancel-in-progress: false
 
 jobs:
   paylas:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 355
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -41,10 +43,15 @@ jobs:
         env:
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
           IG_USER_ID: "17841402476178102"
-          MOD: ${{ github.event_name == 'workflow_dispatch' && inputs.mod || 'takvim' }}
+          MOD: ${{ github.event_name == 'workflow_dispatch' && inputs.mod || 'bekci' }}
           KLASOR: ${{ inputs.klasor }}
           SADECE_INSTAGRAM: ${{ inputs.sadece_instagram || false }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          python paylas.py
+          if [ "$MOD" = "bekci" ]; then
+            bash bekci.sh
+          else
+            python paylas.py
+          fi
