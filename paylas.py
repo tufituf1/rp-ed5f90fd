@@ -300,7 +300,7 @@ def main():
         git("add", "-A", str(folder))
         git("mv", str(folder), str(DONE / folder.name))
         git("commit", "-m", f"Paylasildi: {folder.name}")
-        git("pull", "--rebase", "-q", "origin", "main")
+        git("pull", "--rebase", "-q", "origin", os.environ.get("GITHUB_REF_NAME", "main"))
         git("push")
 
     if failed:

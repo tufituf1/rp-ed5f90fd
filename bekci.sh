@@ -28,7 +28,7 @@ EOF
 }
 
 while [ "$SECONDS" -lt "$BITIS" ]; do
-  git pull -q --rebase origin main || true
+  git pull -q --rebase origin "${GITHUB_REF_NAME:-main}" || true
   if [ ! -f AKTIF ]; then
     echo "AKTIF dosyasi yok, bekci duruyor."
     exit 0
